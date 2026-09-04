@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""omarchy-agenda - agenda do dia agregada de várias contas Google.
+"""omarchy-agenda - today's agenda, merged across several Google accounts.
 
-Subcomandos:
-  setup      grava o OAuth client (id/secret) do seu projeto no Google Cloud
-  login      autoriza uma conta Google (pode repetir para N contas)
-  accounts   lista as contas autorizadas
-  logout     remove uma conta
-  calendars  lista as agendas visíveis de cada conta
-  today      imprime os eventos do dia (JSON com --json)
-  next       imprime a próxima reunião em texto curto
+Subcommands:
+  setup      store the OAuth client (id/secret) of your Google Cloud project
+  login      authorize one Google account (repeat it for N accounts)
+  accounts   list the authorized accounts
+  logout     remove an account
+  calendars  list the visible calendars of each account
+  today      print the day's events (JSON with --json)
+  next       print the next meeting as a short line
 
-Estado (0600) em $XDG_DATA_HOME/omarchy-agenda (padrão ~/.local/share).
-Sem dependências externas: somente a stdlib.
+State (0600) under $XDG_DATA_HOME/omarchy-agenda (default ~/.local/share).
+No external dependencies: stdlib only.
 """
 
 import argparse
@@ -45,34 +45,37 @@ TOKENS_DIR = DATA_DIR / "tokens"
 CACHE_DIR = DATA_DIR / "cache"
 CONFIG_FILE = DATA_DIR / "config.json"
 
-SETUP_HELP = """Nenhum OAuth client configurado.
+SETUP_HELP = """No OAuth client configured.
 
-Passo único no Google Cloud (grátis):
+One-time setup in Google Cloud (free):
   1. https://console.cloud.google.com/projectcreate
-     Crie o projeto. Em conta Gmail pessoal, Organização = "Sem organização".
-  2. Ative a API do Calendar no projeto:
+     Create the project. On a personal Gmail account, Organization = "No
+     organization".
+  2. Enable the Calendar API on that project:
      https://console.cloud.google.com/apis/library/calendar-json.googleapis.com
-  3. Tela de consentimento: https://console.cloud.google.com/auth/overview
-     - "Começar": nome do app, e-mail de suporte, Público = "Externo"
-     - Depois, em Público, clique em "Publicar app".
-       Em modo "Teste" o Google expira a autorização a cada 7 dias e você
-       teria que rodar o login toda semana. Publicado, o acesso não expira;
-       o custo é a tela "app não verificado" na primeira autorização
-       (Avançado > "Acessar ... (não seguro)" — o app é o seu).
-     - Se preferir deixar em Teste, adicione cada conta em "Usuários de teste".
-  4. Credenciais > Criar credenciais > "ID do cliente OAuth" >
-     tipo "App para computador" > Criar > "Fazer download do JSON"
-  5. Aponte o setup para o arquivo baixado:
+  3. Consent screen: https://console.cloud.google.com/auth/overview
+     - "Get started": app name, support email, Audience = "External"
+     - Then, under Audience, click "Publish app".
+       While the app stays in "Testing" Google expires the authorization
+       every 7 days and you have to run the login again each week. Published,
+       it does not expire; the price is the "app not verified" screen on the
+       first authorization (Advanced > "Go to ... (unsafe)" - the app is
+       yours).
+     - If you would rather keep it in Testing, add each account under
+       "Test users".
+  4. Credentials > Create credentials > "OAuth client ID" >
+     type "Desktop app" > Create > "Download JSON"
+  5. Point setup at the downloaded file:
 
        omarchy-agenda setup --from ~/Downloads/client_secret_*.json
 
-Depois autorize cada conta (uma vez por conta):
+Then authorize each account (once per account):
 
        omarchy-agenda login
 """
 
 
-# --------------------------------------------------------------- utilidades
+# ---------------------------------------------------------------- helpers
 
 def die(msg, code=1):
     print(msg, file=sys.stderr)
@@ -140,7 +143,7 @@ class ApiError(Exception):
             text = parsed.get("error_description") or err
         else:
             text = ""
-        text = text or (self.detail or "").strip()[:200] or "falha de rede"
+        text = text or (self.detail or "").strip()[:200] or "network failure"
         return f"HTTP {self.status}: {text}" if self.status else text
 
     @property
@@ -199,7 +202,7 @@ def access_token(email, client, force=False):
     account = read_json(account_path(email)) or {}
     refresh = account.get("refresh_token")
     if not refresh:
-        raise ApiError(0, "conta sem refresh token; rode: omarchy-agenda login")
+        raise ApiError(0, "account has no refresh token; run: omarchy-agenda login")
 
     payload = http_json(TOKEN_URI, data={
         "client_id": client["client_id"],
@@ -209,7 +212,7 @@ def access_token(email, client, force=False):
     })
     token = payload.get("access_token")
     if not token:
-        raise ApiError(0, "resposta sem access_token")
+        raise ApiError(0, "response without access_token")
     write_json(cache_path, {
         "access_token": token,
         "expires_at": now + float(payload.get("expires_in", 3600)),
@@ -238,13 +241,13 @@ class _CallbackHandler(BaseHTTPRequestHandler):
         error = (query.get("error") or [""])[0]
 
         if error:
-            message = f"Autorização recusada: {error}"
+            message = f"Authorization denied: {error}"
             _CallbackHandler.result = {"error": error}
         elif not code or state != _CallbackHandler.expected_state:
-            message = "Requisição inválida."
+            message = "Invalid request."
             _CallbackHandler.result = {"error": "state_mismatch"}
         else:
-            message = "Conta autorizada. Pode fechar esta aba."
+            message = "Account authorized. You can close this tab."
             _CallbackHandler.result = {"code": code}
 
         body = (
@@ -284,8 +287,8 @@ def cmd_login(args):
         "state": state,
     })
 
-    print("Abrindo o navegador para autorizar a conta Google...")
-    print(f"\nSe não abrir, acesse:\n{auth_url}\n")
+    print("Opening the browser to authorize the Google account...")
+    print(f"\nIf it does not open, go to:\n{auth_url}\n")
     if not args.no_browser:
         try:
             if os.environ.get("WAYLAND_DISPLAY") or os.environ.get("DISPLAY"):
@@ -301,7 +304,7 @@ def cmd_login(args):
 
     result = _CallbackHandler.result or {}
     if not result.get("code"):
-        die(f"Login não concluído ({result.get('error', 'timeout')}).", 1)
+        die(f"Login not completed ({result.get('error', 'timeout')}).", 1)
 
     payload = http_json(TOKEN_URI, data={
         "client_id": client["client_id"],
@@ -316,13 +319,13 @@ def cmd_login(args):
     if not email:
         email = userinfo_email(payload.get("access_token", ""))
     if not email:
-        die("Não consegui descobrir o e-mail da conta autorizada.", 1)
+        die("Could not determine the e-mail of the authorized account.", 1)
     if not refresh:
         existing = read_json(account_path(email)) or {}
         refresh = existing.get("refresh_token")
         if not refresh:
-            die("Google não devolveu refresh_token. Revogue o acesso em "
-                "https://myaccount.google.com/permissions e rode o login de novo.", 1)
+            die("Google returned no refresh_token. Revoke the access at "
+                "https://myaccount.google.com/permissions and run the login again.", 1)
 
     write_json(account_path(email), {
         "email": email,
@@ -332,8 +335,8 @@ def cmd_login(args):
     })
     (TOKENS_DIR / f"{re.sub(r'[^A-Za-z0-9@._+-]', '_', email)}.json").unlink(missing_ok=True)
     clear_cache()
-    print(f"\nConta autorizada: {email}")
-    print("Rode 'omarchy-agenda login' novamente para adicionar outra conta.")
+    print(f"\nAccount authorized: {email}")
+    print("Run 'omarchy-agenda login' again to add another account.")
     return 0
 
 
@@ -361,20 +364,20 @@ def userinfo_email(token):
 
 
 def client_from_file(path):
-    """Le o client_secret_*.json que o Console baixa."""
+    """Read the client_secret_*.json the Console downloads."""
     data = read_json(Path(path).expanduser())
     if not isinstance(data, dict):
-        die(f"Nao consegui ler o JSON: {path}", 1)
+        die(f"Could not read the JSON: {path}", 1)
     node = data.get("installed") or data.get("web") or data
     client_id = str(node.get("client_id") or "")
     client_secret = str(node.get("client_secret") or "")
     if not client_id or not client_secret:
-        die(f"O JSON nao tem client_id/client_secret: {path}", 1)
+        die(f"The JSON has no client_id/client_secret: {path}", 1)
     return client_id, client_secret
 
 
 def downloaded_client():
-    """O ultimo client_secret_*.json baixado, se houver."""
+    """The most recent downloaded client_secret_*.json, if any."""
     candidates = []
     for folder in (Path.home() / "Downloads", Path.home() / "Downloads/google",
                    Path.home() / "Desktop"):
@@ -391,8 +394,8 @@ def cmd_setup(args):
     else:
         found = downloaded_client()
         if found:
-            answer = input(f"Usar {found}? [S/n] ").strip().lower()
-            if answer in ("", "s", "y", "sim", "yes"):
+            answer = input(f"Use {found}? [Y/n] ").strip().lower()
+            if answer in ("", "y", "yes"):
                 client_id, client_secret = client_from_file(found)
             else:
                 found = None
@@ -400,13 +403,13 @@ def cmd_setup(args):
             client_id = args.client_id or input("Client ID: ").strip()
             client_secret = args.client_secret or input("Client secret: ").strip()
     if not client_id or not client_secret:
-        die("Client ID e Client secret são obrigatórios.\n\n" + SETUP_HELP, 2)
+        die("Client ID and Client secret are required.\n\n" + SETUP_HELP, 2)
     if not client_id.endswith(".apps.googleusercontent.com"):
-        print("Aviso: o Client ID normalmente termina em .apps.googleusercontent.com",
+        print("Warning: a Client ID normally ends in .apps.googleusercontent.com",
               file=sys.stderr)
     write_json(CLIENT_FILE, {"client_id": client_id, "client_secret": client_secret})
-    print(f"OAuth client gravado em {CLIENT_FILE}")
-    print("Agora autorize cada conta: omarchy-agenda login")
+    print(f"OAuth client stored at {CLIENT_FILE}")
+    print("Now authorize each account: omarchy-agenda login")
     return 0
 
 
@@ -416,28 +419,28 @@ def cmd_accounts(args):
         print(json.dumps({"accounts": [a["email"] for a in accounts]}, ensure_ascii=False))
         return 0
     if not accounts:
-        print("Nenhuma conta autorizada. Rode: omarchy-agenda login")
+        print("No account authorized yet. Run: omarchy-agenda login")
         return 0
     for acc in accounts:
-        print(f"{acc['email']}  (desde {acc.get('added_at', '?')})")
+        print(f"{acc['email']}  (since {acc.get('added_at', '?')})")
     return 0
 
 
 def cmd_logout(args):
     path = account_path(args.email)
     if not path.exists():
-        die(f"Conta não encontrada: {args.email}", 1)
+        die(f"Account not found: {args.email}", 1)
     account = read_json(path) or {}
     client = load_client()
     if client and account.get("refresh_token") and not args.keep_grant:
         try:
             http_json(REVOKE_URI, data={"token": account["refresh_token"]})
         except ApiError as err:
-            print(f"Aviso: revogação no Google falhou ({err}).", file=sys.stderr)
+            print(f"Warning: revoking at Google failed ({err}).", file=sys.stderr)
     path.unlink(missing_ok=True)
     (TOKENS_DIR / f"{re.sub(r'[^A-Za-z0-9@._+-]', '_', args.email)}.json").unlink(missing_ok=True)
     clear_cache()
-    print(f"Removida: {args.email}")
+    print(f"Removed: {args.email}")
     return 0
 
 
@@ -447,7 +450,7 @@ def clear_cache():
             path.unlink(missing_ok=True)
 
 
-# ------------------------------------------------------------------- eventos
+# ----------------------------------------------------------------- events
 
 TAG_RE = re.compile(r"<[^>]+>")
 JOIN_PATTERNS = [
@@ -480,7 +483,7 @@ def plain_text(html):
 
 
 def find_join(event):
-    """Devolve (url, kind) do link de videoconferência do evento."""
+    """Return (url, kind) for the event's video-conference link."""
     conf = event.get("conferenceData") or {}
     for entry in conf.get("entryPoints") or []:
         if entry.get("entryPointType") == "video" and entry.get("uri"):
@@ -489,8 +492,8 @@ def find_join(event):
     if event.get("hangoutLink"):
         return str(event["hangoutLink"]), "meet"
 
-    # O convite do Zoom/Teams costuma vir so dentro de <a href="...">, entao o
-    # HTML cru entra no palheiro junto com o texto limpo.
+    # A Zoom/Teams invite often lives only inside <a href="...">, so the raw
+    # HTML joins the haystack alongside the stripped text.
     raw_description = str(event.get("description") or "")
     haystack = "\n".join([
         str(event.get("location") or ""),
@@ -519,7 +522,7 @@ def conference_kind(uri, conf):
 
 
 def with_authuser(url, email):
-    """Fixa a conta certa em links do Google (evita cair no perfil errado)."""
+    """Pin the right account on Google links (avoids landing on the wrong one)."""
     if not url:
         return url
     parts = urllib.parse.urlsplit(url)
@@ -542,7 +545,7 @@ def my_status(event):
 
 
 def parse_dt(node, day_start):
-    """Converte start/end do Calendar em (datetime aware, all_day)."""
+    """Turn a Calendar start/end node into (aware datetime, all_day)."""
     if node.get("dateTime"):
         return datetime.fromisoformat(node["dateTime"]).astimezone(), False
     if node.get("date"):
@@ -604,7 +607,7 @@ def fetch_events(email, label, token, calendar, day_start, day_end, config):
             "calendar": calendar_name,
             "primary": bool(calendar.get("primary")),
             "color": calendar.get("backgroundColor") or "",
-            "title": str(event.get("summary") or "(sem título)"),
+            "title": str(event.get("summary") or "(no title)"),
             "start": start.isoformat(),
             "end": end.isoformat(),
             "startTs": start.timestamp(),
@@ -636,7 +639,7 @@ def resolve_date(value):
     try:
         return date_cls.fromisoformat(text)
     except ValueError:
-        die(f"Data inválida: {value} (use YYYY-MM-DD, today, tomorrow)", 1)
+        die(f"Invalid date: {value} (use YYYY-MM-DD, today, tomorrow)", 1)
 
 
 def collect(day, config, client, accounts):
@@ -656,7 +659,7 @@ def collect(day, config, client, accounts):
         except ApiError as err:
             if err.invalid_grant:
                 reauth.append(email)
-                errors.append(f"{email}: autorização expirada, rode 'omarchy-agenda login'")
+                errors.append(f"{email}: authorization expired, run 'omarchy-agenda login'")
             else:
                 errors.append(f"{email}: {err}")
             return []
@@ -715,11 +718,11 @@ def cmd_today(args):
 
     if not client:
         result["needsSetup"] = True
-        result["errors"] = ["OAuth client não configurado (omarchy-agenda setup)"]
+        result["errors"] = ["OAuth client not configured (omarchy-agenda setup)"]
         return emit(args, result, 2)
     if not accounts:
         result["needsLogin"] = True
-        result["errors"] = ["Nenhuma conta autorizada (omarchy-agenda login)"]
+        result["errors"] = ["No account authorized (omarchy-agenda login)"]
         return emit(args, result, 2)
 
     events, errors, reauth = collect(day, config, client, accounts)
@@ -756,10 +759,10 @@ def emit(args, result, code):
         return code
     events = result.get("events") or []
     if not events:
-        print("Nada na agenda.")
+        print("Nothing on the agenda.")
         return code
     for event in events:
-        when = "dia inteiro" if event["allDay"] else (
+        when = "all day" if event["allDay"] else (
             f"{event['start'][11:16]}-{event['end'][11:16]}")
         mark = "*" if event.get("joinUrl") else " "
         print(f"{when:>11} {mark} {event['title']}  [{event['accountLabel']}]")
@@ -772,14 +775,14 @@ def cmd_next(args):
     client = load_client()
     accounts = list_accounts()
     if not client or not accounts:
-        print("agenda não configurada")
+        print("agenda not configured")
         return 2
     day = date_cls.today()
     events, _, _ = collect(day, config, client, accounts)
     now = datetime.now().astimezone().timestamp()
     upcoming = [e for e in events if not e["allDay"] and e["endTs"] > now]
     if not upcoming:
-        print("sem reuniões hoje")
+        print("no meetings today")
         return 0
     event = upcoming[0]
     print(f"{event['start'][11:16]} {event['title']}")
@@ -795,7 +798,7 @@ def cmd_calendars(args):
     if args.email:
         accounts = [a for a in accounts if a["email"] == args.email]
         if not accounts:
-            die(f"Conta não encontrada: {args.email}", 1)
+            die(f"Account not found: {args.email}", 1)
     for account in accounts:
         email = account["email"]
         print(f"\n{email}")
@@ -813,41 +816,41 @@ def cmd_calendars(args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="omarchy-agenda",
-                                     description="Agenda do dia de várias contas Google.")
+                                     description="Today's agenda across several Google accounts.")
     sub = parser.add_subparsers(dest="command")
 
-    p_setup = sub.add_parser("setup", help="grava o OAuth client do Google Cloud")
+    p_setup = sub.add_parser("setup", help="store the Google Cloud OAuth client")
     p_setup.add_argument("--client-id")
     p_setup.add_argument("--client-secret")
     p_setup.add_argument("--from", dest="from_file", metavar="ARQUIVO",
-                         help="client_secret_*.json baixado do Console")
+                         help="client_secret_*.json downloaded from the Console")
     p_setup.set_defaults(func=cmd_setup)
 
-    p_login = sub.add_parser("login", help="autoriza uma conta Google")
+    p_login = sub.add_parser("login", help="authorize a Google account")
     p_login.add_argument("--no-browser", action="store_true")
     p_login.set_defaults(func=cmd_login)
 
-    p_accounts = sub.add_parser("accounts", help="lista contas autorizadas")
+    p_accounts = sub.add_parser("accounts", help="list authorized accounts")
     p_accounts.add_argument("--json", action="store_true")
     p_accounts.set_defaults(func=cmd_accounts)
 
-    p_logout = sub.add_parser("logout", help="remove uma conta")
+    p_logout = sub.add_parser("logout", help="remove an account")
     p_logout.add_argument("email")
     p_logout.add_argument("--keep-grant", action="store_true",
-                          help="não revoga o token no Google")
+                          help="do not revoke the token at Google")
     p_logout.set_defaults(func=cmd_logout)
 
-    p_cals = sub.add_parser("calendars", help="lista as agendas de cada conta")
+    p_cals = sub.add_parser("calendars", help="list each account's calendars")
     p_cals.add_argument("email", nargs="?")
     p_cals.set_defaults(func=cmd_calendars)
 
-    p_today = sub.add_parser("today", help="eventos do dia")
+    p_today = sub.add_parser("today", help="the day's events")
     p_today.add_argument("--json", action="store_true")
     p_today.add_argument("--date", default="today")
     p_today.add_argument("--max", type=int, default=0)
     p_today.set_defaults(func=cmd_today)
 
-    p_next = sub.add_parser("next", help="próxima reunião (texto curto)")
+    p_next = sub.add_parser("next", help="next meeting (short line)")
     p_next.set_defaults(func=cmd_next, json=False)
 
     args = parser.parse_args(argv)

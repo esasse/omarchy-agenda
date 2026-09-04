@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>omarchy-agenda</title>
-<meta name="description" content="Agenda do dia de várias contas Google na barra do Omarchy, com um clique para entrar na reunião.">
+<meta name="description" content="Today's agenda from several Google accounts in the Omarchy bar, with one click to join the meeting.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -19,8 +19,8 @@
     --accent: #c2415c;
     --blue: #2f7597;
 
-    /* A reprodução da barra guarda o próprio tema: ela é um pedaço de
-       desktop escuro, e não muda de cor com a página. */
+    /* The bar rendering keeps its own theme: it is a slice of dark
+       desktop, and does not follow the page's light/dark. */
     --bar-ground: #0f1214;
     --bar-surface: #171b1e;
     --bar-text: #cfd2d4;
@@ -75,7 +75,7 @@
     padding: 0 1.5rem 5rem;
   }
 
-  /* ---------------------------------------------------------- cabeçalho */
+  /* ------------------------------------------------------------- header */
 
   header {
     padding: 4rem 0 2.5rem;
@@ -135,7 +135,7 @@
   a { color: var(--blue); }
   a:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-  /* ------------------------------------------------- reprodução da UI */
+  /* --------------------------------------------------- UI rendering */
 
   .demo { margin: 1rem 0 0.75rem; }
 
@@ -199,7 +199,7 @@
   .hero-row__meta {
     display: block;
     font-size: 0.6875rem;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.045em;
     text-transform: uppercase;
     color: var(--bar-muted);
   }
@@ -286,7 +286,7 @@
     margin-top: 0.6rem;
   }
 
-  /* -------------------------------------------------------- conteúdo */
+  /* ------------------------------------------------------------ body */
 
   main { display: flex; flex-direction: column; gap: 3rem; margin-top: 3.5rem; }
   section { display: flex; flex-direction: column; gap: 1rem; }
@@ -378,12 +378,12 @@
 <div class="wrap">
 
   <header>
-    <p class="eyebrow">Plugin do omarchy-shell</p>
+    <p class="eyebrow">omarchy-shell plugin</p>
     <h1>omarchy-agenda</h1>
-    <p class="lede">A agenda do dia de várias contas Google na barra do Omarchy — e um clique para entrar na reunião que está começando.</p>
+    <p class="lede">Today's agenda from several Google accounts in the Omarchy bar — and one click to join the meeting that is starting.</p>
     <div class="links">
-      <a class="btn btn--primary" href="https://github.com/esasse/omarchy-agenda">Repositório</a>
-      <a class="btn" href="#instalacao">Instalação</a>
+      <a class="btn btn--primary" href="https://github.com/esasse/omarchy-agenda">Repository</a>
+      <a class="btn" href="#install">Install</a>
       <a class="btn" href="https://omarchy.org">Omarchy</a>
     </div>
   </header>
@@ -398,7 +398,7 @@
             <path d="M15 10.5 21 7v10l-6-3.5"></path>
             <rect x="3" y="6" width="12" height="12" rx="2"></rect>
           </svg>
-          Daily do time de produto · 21 min
+          Product team daily · 21 min
         </span>
         <span class="tray" aria-hidden="true">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 13a11 11 0 0 1 14 0"></path><path d="M8.5 16.5a6 6 0 0 1 7 0"></path><circle cx="12" cy="20" r="1"></circle></svg>
@@ -417,31 +417,31 @@
               </svg>
             </span>
             <span class="hero-row__text">
-              <span class="hero-row__title">Hoje</span>
-              <span class="hero-row__meta">6 eventos · agora até 09:39</span>
+              <span class="hero-row__title">Today</span>
+              <span class="hero-row__meta">6 events · now until 09:39</span>
             </span>
-            <span class="hero-row__date">sexta, 4 de setembro</span>
+            <span class="hero-row__date">Friday, September 4</span>
           </div>
 
-          <p class="section-label">Agenda do dia</p>
+          <p class="section-label">Today's schedule</p>
 
           <div class="events">
             <div class="event event--personal">
               <span class="event__stripe"></span>
-              <span class="event__time">dia<span>inteiro</span></span>
+              <span class="event__time">all<span>day</span></span>
               <span class="event__body">
-                <span class="event__title">Feriado municipal</span>
-                <span class="event__meta">pessoal · Feriados</span>
+                <span class="event__title">City holiday</span>
+                <span class="event__meta">personal · Holidays</span>
               </span>
-              <span class="event__side">hoje</span>
+              <span class="event__side">today</span>
             </div>
 
             <div class="event event--past">
               <span class="event__stripe"></span>
               <span class="event__time">06:30<span>07:30</span></span>
               <span class="event__body">
-                <span class="event__title">Revisão de roadmap</span>
-                <span class="event__meta">trabalho · Google Meet · 6 pessoas</span>
+                <span class="event__title">Roadmap review</span>
+                <span class="event__meta">work · Google Meet · 6 guests</span>
               </span>
               <span class="event__side"></span>
             </div>
@@ -450,11 +450,11 @@
               <span class="event__stripe"></span>
               <span class="event__time">09:09<span>09:39</span></span>
               <span class="event__body">
-                <span class="event__title">Daily do time de produto</span>
-                <span class="event__meta">trabalho · Google Meet · 8 pessoas</span>
+                <span class="event__title">Product team daily</span>
+                <span class="event__meta">work · Google Meet · 8 guests</span>
               </span>
               <span class="event__side">
-                agora
+                now
                 <span class="event__join">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
                     <path d="M15 10.5 21 7v10l-6-3.5"></path>
@@ -468,106 +468,106 @@
               <span class="event__stripe"></span>
               <span class="event__time">09:40<span>10:10</span></span>
               <span class="event__body">
-                <span class="event__title">1:1 com Henrique</span>
-                <span class="event__meta">trabalho · Zoom · 2 pessoas</span>
+                <span class="event__title">1:1 with Henrique</span>
+                <span class="event__meta">work · Zoom · 2 guests</span>
               </span>
-              <span class="event__side">em 22 min</span>
+              <span class="event__side">in 22 min</span>
             </div>
 
             <div class="event event--personal">
               <span class="event__stripe"></span>
               <span class="event__time">11:30<span>12:30</span></span>
               <span class="event__body">
-                <span class="event__title">Consulta médica</span>
-                <span class="event__meta">pessoal · Av. Paulista 1000, sala 42</span>
+                <span class="event__title">Doctor appointment</span>
+                <span class="event__meta">personal · 1000 Paulista Ave, room 42</span>
               </span>
-              <span class="event__side">em 2h30</span>
+              <span class="event__side">in 2h30</span>
             </div>
           </div>
 
-          <p class="hint">enter entrar · j próxima · r atualizar · o no Calendar</p>
+          <p class="hint">enter join · j next · r refresh · o in Calendar</p>
         </div>
       </div>
     </div>
-    <figcaption>Reprodução da interface, com eventos de exemplo. A linha em destaque é a reunião em curso; o ícone à direita entra na chamada.</figcaption>
+    <figcaption>Rendering of the interface, with example events. The highlighted row is the meeting in progress; the icon on the right joins the call.</figcaption>
   </figure>
 
   <main>
-    <section id="o-que-faz">
-      <h2>O que ele faz</h2>
+    <section id="what-it-does">
+      <h2>What it does</h2>
       <div class="traits">
         <div class="trait">
-          <h3>Várias contas, uma lista</h3>
-          <p>Cada conta Google entra com suas agendas visíveis, e o dia aparece em ordem cronológica — não uma aba por conta.</p>
+          <h3>Several accounts, one list</h3>
+          <p>Each Google account brings in its visible calendars, and the day shows up in chronological order — not one tab per account.</p>
         </div>
         <div class="trait">
-          <h3>Entrar em um clique</h3>
-          <p>Clicar na linha abre a chamada: Meet, Zoom, Teams, Webex e afins, vindos do campo de conferência do evento ou garimpados da descrição do convite.</p>
+          <h3>Join in one click</h3>
+          <p>Clicking the row opens the call: Meet, Zoom, Teams, Webex and friends, taken from the event's conference field or dug out of the invite description.</p>
         </div>
         <div class="trait">
-          <h3>Na conta certa</h3>
-          <p>Links do Google saem com <code>authuser=&lt;conta&gt;</code>, então a reunião abre na conta dona do convite mesmo com várias logadas no navegador.</p>
+          <h3>Under the right account</h3>
+          <p>Google links carry <code>authuser=&lt;account&gt;</code>, so the meeting opens under the account that owns the invite even with several signed in to the browser.</p>
         </div>
         <div class="trait">
-          <h3>Sem dependências</h3>
-          <p>O QML só desenha; quem fala com o Google é um helper de <em>stdlib</em> pura do Python. Sem pip, sem AUR, sem daemon.</p>
+          <h3>No dependencies</h3>
+          <p>The QML only draws; what talks to Google is a pure <em>stdlib</em> Python helper. No pip, no AUR, no daemon.</p>
         </div>
       </div>
     </section>
 
-    <section id="instalacao">
-      <h2>Instalação</h2>
-      <pre><span class="c"># o plugin é um repositório git com manifest.json na raiz</span>
+    <section id="install">
+      <h2>Install</h2>
+      <pre><span class="c"># the plugin is a git repository with manifest.json at its root</span>
 omarchy plugin add https://github.com/esasse/omarchy-agenda.git --enable --yes
 
-<span class="c"># o CLI no terminal (o popup usa caminho absoluto e não precisa disto)</span>
+<span class="c"># the CLI in a terminal (the popup uses an absolute path and needs none of this)</span>
 ln -sf ~/.config/omarchy/plugins/esasse.agenda/bin/omarchy-agenda ~/.local/bin/omarchy-agenda</pre>
-      <p>O widget entra na seção direita da barra; mova com <code>omarchy bar move esasse.agenda --section left</code>. Editar o QML depois pede <code>omarchy restart shell</code>.</p>
+      <p>The widget lands in the bar's right section; move it with <code>omarchy bar move esasse.agenda --section left</code>. Editing the QML afterwards needs <code>omarchy restart shell</code>.</p>
     </section>
 
-    <section id="contas">
-      <h2>Conectar as contas</h2>
-      <p>O plugin usa um OAuth client seu, criado uma vez no Google Cloud — nenhuma credencial vem embutida no código.</p>
+    <section id="accounts">
+      <h2>Connect your accounts</h2>
+      <p>The plugin uses an OAuth client of your own, created once in Google Cloud — no credential ships inside the code.</p>
       <ol>
-        <li>Crie um projeto e ative a <strong>Google Calendar API</strong>.</li>
-        <li>Configure a tela de consentimento como <strong>Externa</strong> e crie uma credencial do tipo <strong>App para computador</strong>.</li>
-        <li>Baixe o JSON e rode <code>omarchy-agenda setup --from ~/Downloads/client_secret_*.json</code>.</li>
-        <li>Rode <code>omarchy-agenda login</code> uma vez por conta.</li>
+        <li>Create a project and enable the <strong>Google Calendar API</strong>.</li>
+        <li>Set the consent screen to <strong>External</strong> and create a credential of type <strong>Desktop app</strong>.</li>
+        <li>Download the JSON and run <code>omarchy-agenda setup --from ~/Downloads/client_secret_*.json</code>.</li>
+        <li>Run <code>omarchy-agenda login</code> once per account.</li>
       </ol>
-      <p>Enquanto o app ficar em modo <em>Testing</em> no Console, o Google expira a autorização a cada 7 dias e o <code>login</code> tem que ser repetido; publicar o app remove essa validade.</p>
+      <p>While the app stays in <em>Testing</em> mode in the Console, Google expires the authorization every 7 days and <code>login</code> has to be repeated; publishing the app removes that expiry.</p>
     </section>
 
-    <section id="uso">
-      <h2>Como se usa</h2>
+    <section id="usage">
+      <h2>How to use it</h2>
       <table>
-        <caption>Na barra</caption>
+        <caption>In the bar</caption>
         <tbody>
-          <tr><th>clique esquerdo</th><td>abre e fecha o popup da agenda</td></tr>
-          <tr><th>clique do meio</th><td>entra na reunião em curso, ou na próxima</td></tr>
-          <tr><th>clique direito</th><td>atualiza agora</td></tr>
+          <tr><th>left click</th><td>opens and closes the agenda popup</td></tr>
+          <tr><th>middle click</th><td>joins the meeting in progress, or the next one</td></tr>
+          <tr><th>right click</th><td>refreshes now</td></tr>
         </tbody>
       </table>
       <table>
-        <caption>No popup</caption>
+        <caption>In the popup</caption>
         <tbody>
-          <tr><th>↑ ↓</th><td>navega pelos eventos</td></tr>
-          <tr><th>enter</th><td>entra na reunião selecionada</td></tr>
-          <tr><th>j</th><td>pula para a reunião de agora</td></tr>
-          <tr><th>r</th><td>atualiza</td></tr>
-          <tr><th>o</th><td>abre o evento no Google Calendar</td></tr>
+          <tr><th>↑ ↓</th><td>move through the events</td></tr>
+          <tr><th>enter</th><td>joins the selected meeting</td></tr>
+          <tr><th>j</th><td>jumps to the current meeting</td></tr>
+          <tr><th>r</th><td>refreshes</td></tr>
+          <tr><th>o</th><td>opens the event in Google Calendar</td></tr>
         </tbody>
       </table>
     </section>
 
-    <section id="privacidade">
-      <h2>Privacidade</h2>
+    <section id="privacy">
+      <h2>Privacy</h2>
       <dl class="privacy">
-        <dt>Escopo somente leitura</dt>
-        <dd>O app pede <code>calendar.readonly</code> e o e-mail da conta. Não cria, altera nem apaga eventos.</dd>
-        <dt>Tudo fica na máquina</dt>
-        <dd>Client secret, refresh tokens e o cache do dia vivem em <code>~/.local/share/omarchy-agenda/</code>, com permissão <code>600</code> em pasta <code>700</code>. Não há servidor no meio: o helper fala direto com a API do Google.</dd>
-        <dt>Nada é compartilhado</dt>
-        <dd>Nenhum dado de agenda é enviado a terceiros, e o projeto não tem telemetria. Para revogar, use <code>omarchy-agenda logout &lt;conta&gt;</code> ou a página de permissões da sua Conta Google.</dd>
+        <dt>Read-only scope</dt>
+        <dd>The app asks for <code>calendar.readonly</code> and the account's e-mail. It never creates, changes or deletes events.</dd>
+        <dt>Everything stays on the machine</dt>
+        <dd>Client secret, refresh tokens and the day's cache live in <code>~/.local/share/omarchy-agenda/</code>, mode <code>600</code> inside a <code>700</code> directory. There is no server in between: the helper talks straight to Google's API.</dd>
+        <dt>Nothing is shared</dt>
+        <dd>No calendar data is sent to third parties, and the project has no telemetry. To revoke, use <code>omarchy-agenda logout &lt;account&gt;</code> or your Google Account's permissions page.</dd>
       </dl>
     </section>
   </main>

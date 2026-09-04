@@ -4,9 +4,10 @@ import Quickshell.Io
 import qs.Commons
 import "Model.js" as Model
 
-// Roda o helper `omarchy-agenda today --json` e mantem o dia em memória.
-// Todo o falar-com-o-Google vive no helper; aqui so sobra o ciclo de vida:
-// poll periódico, relógio para as contagens, e as ações de um clique.
+// Runs the `omarchy-agenda today --json` helper and keeps the day in memory.
+// All the talking-to-Google lives in the helper; what is left here is the
+// lifecycle: periodic poll, a clock for the countdowns, and the one-click
+// actions.
 Item {
   id: root
 
@@ -58,7 +59,7 @@ Item {
     try {
       parsed = JSON.parse(String(raw || ""))
     } catch (e) {
-      lastError = "resposta inválida do helper"
+      lastError = "invalid response from the helper"
       return
     }
     if (!parsed || typeof parsed !== "object") return
@@ -75,8 +76,8 @@ Item {
     nowTs = Date.now() / 1000
   }
 
-  // Um clique = entrar. Sem link de vídeo, cai para o evento no Calendar,
-  // que é o melhor "abrir isso" que existe para um compromisso sem sala.
+  // One click = join. With no video link, fall back to the event in Calendar,
+  // which is the best "open this" a room-less appointment has.
   function activate(event) {
     if (!event) return
     if (event.joinUrl) openUrl(event.joinUrl)
@@ -115,7 +116,7 @@ Item {
       }
       var err = String(fetchStderr.text || "").replace(/\s+/g, " ").trim()
       root.lastError = err.length > 0 ? err.substring(0, 160)
-                                      : "helper falhou (código " + exitCode + ")"
+                                      : "helper failed (exit code " + exitCode + ")"
     }
   }
 
@@ -128,8 +129,8 @@ Item {
     onTriggered: root.refresh(true)
   }
 
-  // Mantém as contagens ("em 12 min", "termina em 4 min") vivas sem bater na
-  // API, e busca de novo quando o dia virou.
+  // Keeps the countdowns ("in 12 min", "ends in 4 min") alive without hitting
+  // the API, and refetches once the day has rolled over.
   Timer {
     interval: 15000
     repeat: true
@@ -141,8 +142,8 @@ Item {
     }
   }
 
-  // Reunião entrando no ar: uma passada extra na API para pegar link/sala que
-  // tenham mudado em cima da hora.
+  // A meeting going live: one extra API pass to pick up a link or room that
+  // changed at the last minute.
   Timer {
     id: edgeTimer
     interval: 30000

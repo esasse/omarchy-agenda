@@ -7,16 +7,17 @@ import qs.Commons
 import qs.Ui
 import "Model.js" as Model
 
-// Agenda do dia na barra: o rótulo mostra a reunião em curso ou a próxima, e
-// o popup lista o dia inteiro com um clique por linha para entrar na chamada.
+// Today's agenda in the bar: the label shows the meeting in progress or the
+// next one, and the popup lists the whole day with one click per row to join
+// the call.
 Panel {
   id: root
   moduleName: "esasse.agenda"
   ipcTarget: "esasse.agenda"
   manageIpc: false
 
-  // O helper mora dentro do próprio plugin, então o caminho sai do QML e não
-  // de um PATH que a shell pode não ter herdado.
+  // The helper lives inside the plugin, so the path comes from the QML rather
+  // than from a PATH the shell may not have inherited.
   readonly property string helperPath: String(Qt.resolvedUrl("bin/omarchy-agenda")).replace(/^file:\/\//, "")
 
   readonly property bool vertical: bar ? bar.vertical : false
@@ -35,10 +36,10 @@ Panel {
     ? rows[rowIndex] : null
   readonly property bool live: agenda.liveEvent !== null
 
-  // A barra tem que dizer a verdade também antes de haver conta: "livre" com
-  // o OAuth pendente seria mentira.
+  // The bar has to tell the truth before there is an account too: "clear"
+  // with the OAuth setup still pending would be a lie.
   readonly property string barLabel: !agenda.configured
-    ? "󰃭 conectar"
+    ? "󰃭 connect"
     : Model.barLabel(agenda.events, agenda.nowTs, agenda.barLabelChars)
 
   function ensureCursor() {
@@ -47,8 +48,8 @@ Panel {
     if (rowIndex < 0) rowIndex = 0
   }
 
-  // Abrir o painel deve cair na reunião que importa agora, não na primeira do
-  // dia — quem abre às 15h quer a das 15h.
+  // Opening the panel should land on the meeting that matters now, not on the
+  // first one of the day — someone opening it at 3pm wants the 3pm one.
   function focusCurrentRow() {
     var target = Model.focusEvent(rows, agenda.nowTs)
     if (!target) { rowIndex = Math.max(0, rows.length - 1); return }
@@ -152,7 +153,7 @@ Panel {
     function join(): string { root.joinFocused(); return "ok" }
     function next(): string {
       var e = agenda.nextEvent
-      return e ? Model.timeLabel(e) + " " + e.title : "sem reuniões hoje"
+      return e ? Model.timeLabel(e) + " " + e.title : "no meetings left today"
     }
   }
 
@@ -223,7 +224,7 @@ Panel {
           PanelHero {
             id: hero
             width: parent.width
-            title: "Hoje"
+            title: "Today"
             meta: Model.heroMeta(agenda.payload, agenda.nowTs)
             detail: Model.dateLabel(agenda.date)
             foreground: root.foreground
@@ -239,7 +240,7 @@ Panel {
             trailingControl: Component {
               PanelActionButton {
                 iconText: "󰑐"
-                tooltipText: "Atualizar (r)"
+                tooltipText: "Refresh (r)"
                 foreground: root.foreground
                 fontFamily: root.fontFamily
                 enabled: !agenda.loading
@@ -252,7 +253,7 @@ Panel {
           Text {
             visible: agenda.lastError !== "" || agenda.stale
             width: parent.width
-            text: agenda.stale ? "Sem rede — mostrando o último dado salvo." : agenda.lastError
+            text: agenda.stale ? "No network — showing the last saved data." : agenda.lastError
             color: agenda.stale ? root.dim : root.urgent
             font.family: root.fontFamily
             font.pixelSize: Style.font.bodySmall
@@ -275,7 +276,7 @@ Panel {
             spacing: Style.space(10)
 
             PanelSectionHeader {
-              text: "AGENDA DO DIA"
+              text: "TODAY'S SCHEDULE"
               foreground: root.foreground
               fontFamily: root.fontFamily
             }
@@ -283,7 +284,7 @@ Panel {
             Text {
               visible: !root.hasRows
               width: parent.width
-              text: agenda.loading ? "Carregando…" : "Nada agendado para hoje."
+              text: agenda.loading ? "Loading…" : "Nothing scheduled today."
               color: root.dim
               font.family: root.fontFamily
               font.pixelSize: Style.font.body
@@ -316,7 +317,7 @@ Panel {
             spacing: Style.space(10)
 
             Text {
-              text: "enter entrar · j próxima · r atualizar · o no Calendar"
+              text: "enter join · j next · r refresh · o in Calendar"
               color: root.dim
               font.family: root.fontFamily
               font.pixelSize: Style.font.caption
@@ -329,7 +330,7 @@ Panel {
     }
   }
 
-  // ------------------------------------------------------------- componentes
+  // -------------------------------------------------------------- components
 
   component EventRow: CursorSurface {
     id: eventRow
@@ -369,8 +370,8 @@ Panel {
       anchors.rightMargin: Style.space(10)
       spacing: Style.space(8)
 
-      // Faixa na cor da agenda de origem: com várias contas na mesma lista,
-      // é o que diz de onde o compromisso veio antes de ler o texto.
+      // A stripe in the source calendar's color: with several accounts in one
+      // list, it says where the appointment came from before you read a word.
       Rectangle {
         Layout.alignment: Qt.AlignVCenter
         Layout.preferredWidth: Style.space(3)
@@ -386,14 +387,14 @@ Panel {
         spacing: 0
 
         Text {
-          text: eventRow.event && eventRow.event.allDay ? "dia" : Model.hm(eventRow.event ? eventRow.event.start : "")
+          text: eventRow.event && eventRow.event.allDay ? "all" : Model.hm(eventRow.event ? eventRow.event.start : "")
           color: eventRow.isLive ? root.urgent : root.foreground
           font.family: root.fontFamily
           font.pixelSize: Style.font.bodySmall
         }
 
         Text {
-          text: eventRow.event && eventRow.event.allDay ? "inteiro" : Model.hm(eventRow.event ? eventRow.event.end : "")
+          text: eventRow.event && eventRow.event.allDay ? "day" : Model.hm(eventRow.event ? eventRow.event.end : "")
           color: root.dim
           font.family: root.fontFamily
           font.pixelSize: Style.font.caption
@@ -437,7 +438,7 @@ Panel {
       PanelActionButton {
         visible: eventRow.joinable
         iconText: Model.joinGlyph(eventRow.event ? eventRow.event.joinKind : "")
-        tooltipText: "Entrar em " + Model.joinName(eventRow.event ? eventRow.event.joinKind : "")
+        tooltipText: "Join " + Model.joinName(eventRow.event ? eventRow.event.joinKind : "")
         foreground: eventRow.isLive ? root.urgent : root.foreground
         fontFamily: root.fontFamily
         Layout.alignment: Qt.AlignVCenter
@@ -492,7 +493,7 @@ Panel {
 
         Text {
           Layout.fillWidth: true
-          text: agenda.needsSetup ? "Configurar acesso ao Google" : "Conectar uma conta Google"
+          text: agenda.needsSetup ? "Set up Google access" : "Connect a Google account"
           color: root.foreground
           font.family: root.fontFamily
           font.pixelSize: Style.font.body
@@ -501,8 +502,8 @@ Panel {
 
         Text {
           Layout.fillWidth: true
-          text: agenda.needsSetup ? "abre um terminal com omarchy-agenda setup"
-                                  : "abre um terminal com omarchy-agenda login"
+          text: agenda.needsSetup ? "opens a terminal running omarchy-agenda setup"
+                                  : "opens a terminal running omarchy-agenda login"
           color: root.dim
           font.family: root.fontFamily
           font.pixelSize: Style.font.caption

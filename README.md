@@ -1,35 +1,36 @@
 # esasse.agenda
 
-Agenda do dia de **várias contas Google** na barra do Omarchy, com um clique
-para entrar na reunião.
+Today's agenda from **several Google accounts** in the Omarchy bar, with one
+click to join the meeting.
 
 ```
 esasse.agenda/
-├── manifest.json          plugin bar-widget do omarchy-shell
-├── Panel.qml              rótulo na barra + popup da agenda
-├── Service.qml            ciclo de vida: poll, relógio, ações
-├── Model.js               formatação e derivações (rótulo, estados, textos)
-├── bin/omarchy-agenda     helper Python (OAuth + Google Calendar API)
+├── manifest.json          omarchy-shell bar-widget plugin
+├── Panel.qml              bar label + agenda popup
+├── Service.qml            lifecycle: poll, clock, actions
+├── Model.js               formatting and derivations (label, states, text)
+├── bin/omarchy-agenda     Python helper (OAuth + Google Calendar API)
+├── docs/index.html        project page (GitHub Pages)
 └── LICENSE                MIT
 ```
 
-O QML nunca fala com o Google: ele só roda `omarchy-agenda today --json` e
-desenha o resultado. O helper é stdlib pura — sem pip, sem AUR.
+The QML never talks to Google: it only runs `omarchy-agenda today --json` and
+draws the result. The helper is pure stdlib — no pip, no AUR.
 
-## Instalação
+## Install
 
-Numa máquina Omarchy nova:
+On a fresh Omarchy machine:
 
 ```bash
 omarchy plugin add https://github.com/esasse/omarchy-agenda.git --enable --yes
 ```
 
-O widget entra na seção direita da barra; mova com
+The widget lands in the bar's right section; move it with
 `omarchy bar move esasse.agenda --section <left|center|right>`.
 
-O popup chama o helper pelo caminho absoluto dentro do próprio plugin
-(`Qt.resolvedUrl`), então o painel funciona sem depender do `PATH` da shell.
-Para usar o CLI no terminal — `setup`, `login`, `today`, `calendars` — crie o
+The popup calls the helper by an absolute path inside the plugin itself
+(`Qt.resolvedUrl`), so the panel does not depend on the shell's `PATH`. To use
+the CLI in a terminal — `setup`, `login`, `today`, `calendars` — create the
 symlink:
 
 ```bash
@@ -37,117 +38,118 @@ ln -sf ~/.config/omarchy/plugins/esasse.agenda/bin/omarchy-agenda \
        ~/.local/bin/omarchy-agenda
 ```
 
-Se o plugin foi clonado com outro id, o caminho é
+If the plugin was cloned under a different id, the path is
 `~/.config/omarchy/plugins/<id>/bin/omarchy-agenda`.
 
-Editar `Model.js` ou os `.qml` pede `omarchy restart shell`: o hot reload do
-shell não reinstancia widgets da barra e deixa o `IpcHandler` antigo
-registrado no alvo.
+Editing `Model.js` or the `.qml` files needs `omarchy restart shell`: the
+shell's hot reload does not re-instantiate bar widgets, and it leaves the old
+`IpcHandler` registered on the target.
 
-## Configuração (uma vez)
+## Setup (once)
 
-1. **Projeto** — <https://console.cloud.google.com/projectcreate>
-   (conta Gmail pessoal: Organização = "Sem organização")
-2. **API** — ative a
+1. **Project** — <https://console.cloud.google.com/projectcreate>
+   (personal Gmail account: Organization = "No organization")
+2. **API** — enable the
    [Google Calendar API](https://console.cloud.google.com/apis/library/calendar-json.googleapis.com)
-   no projeto
-3. **Consentimento** — <https://console.cloud.google.com/auth/overview>
-   - "Começar": nome do app, e-mail de suporte, Público = **Externo**
-   - em *Público*, **Publicar app**. Em modo "Teste" o Google expira a
-     autorização a cada 7 dias; publicado, não expira — o preço é a tela
-     "app não verificado" na primeira autorização (*Avançado > Acessar …*).
-   - alternativa: deixar em Teste e listar cada conta em *Usuários de teste*
-4. **Credencial** — *Credenciais > Criar credenciais > ID do cliente OAuth >
-   App para computador > Criar > Fazer download do JSON*
+   on that project
+3. **Consent** — <https://console.cloud.google.com/auth/overview>
+   - "Get started": app name, support email, Audience = **External**
+   - under *Audience*, click **Publish app**. In "Testing" mode Google expires
+     the authorization every 7 days; published, it does not expire — the price
+     is the "app not verified" screen on the first authorization
+     (*Advanced > Go to …*).
+   - alternative: keep it in Testing and list each account under *Test users*
+4. **Credential** — *Credentials > Create credentials > OAuth client ID >
+   Desktop app > Create > Download JSON*
 
 ```bash
 omarchy-agenda setup --from ~/Downloads/client_secret_*.json
-omarchy-agenda login    # repita para cada conta Google
+omarchy-agenda login    # repeat for each Google account
 ```
 
-`setup` sem argumento também acha o `client_secret_*.json` mais recente em
-`~/Downloads` e pede confirmação — o secret nunca precisa ser digitado.
+`setup` with no arguments also finds the most recent `client_secret_*.json` in
+`~/Downloads` and asks for confirmation — the secret never has to be typed.
 
-O painel abre esses dois comandos num terminal: clique em "Configurar acesso
-ao Google" / "Conectar uma conta Google".
+The panel opens both commands in a terminal for you: click "Set up Google
+access" / "Connect a Google account".
 
-## Uso
+## Usage
 
-Na barra:
+In the bar:
 
-| Ação | Efeito |
+| Action | Effect |
 |---|---|
-| clique esquerdo | abre/fecha o popup da agenda |
-| clique do meio | entra na reunião em curso (ou na próxima) |
-| clique direito | atualiza agora |
-| hover | tooltip com a reunião de agora e a próxima |
+| left click | opens/closes the agenda popup |
+| middle click | joins the meeting in progress (or the next one) |
+| right click | refreshes now |
+| hover | tooltip with the current and the next meeting |
 
-No popup:
+In the popup:
 
-| Tecla | Efeito |
+| Key | Effect |
 |---|---|
-| ↑ / ↓ | navega |
-| enter | entra na reunião selecionada |
-| `j` | entra na reunião em curso / próxima |
-| `r` | atualiza |
-| `o` | abre o evento selecionado no Google Calendar |
-| `l` | abre um terminal para conectar outra conta |
-| esc | fecha |
+| ↑ / ↓ | move |
+| enter | join the selected meeting |
+| `j` | join the current / next meeting |
+| `r` | refresh |
+| `o` | open the selected event in Google Calendar |
+| `l` | open a terminal to connect another account |
+| esc | close |
 
-Clicar em qualquer linha entra na chamada. Sem link de vídeo, o clique abre o
-evento no Google Calendar. Links do Google saem com `authuser=<conta>`, então
-a reunião abre na conta certa mesmo com várias logadas no navegador.
+Clicking any row joins the call. With no video link, the click opens the event
+in Google Calendar. Google links carry `authuser=<account>`, so the meeting
+opens under the right account even with several signed in to the browser.
 
 ## CLI
 
 ```bash
-omarchy-agenda today                  # agenda de hoje em texto
-omarchy-agenda today --json           # o que o painel consome
-omarchy-agenda today --date tomorrow  # amanhã (ou YYYY-MM-DD)
-omarchy-agenda next                   # "14:30 Reunião" (bom para scripts)
-omarchy-agenda accounts               # contas autorizadas
-omarchy-agenda calendars              # agendas visíveis de cada conta
-omarchy-agenda logout a@b.com         # remove e revoga no Google
+omarchy-agenda today                  # today's agenda as text
+omarchy-agenda today --json           # what the panel consumes
+omarchy-agenda today --date tomorrow  # tomorrow (or YYYY-MM-DD)
+omarchy-agenda next                   # "14:30 Meeting" (handy for scripts)
+omarchy-agenda accounts               # authorized accounts
+omarchy-agenda calendars              # each account's visible calendars
+omarchy-agenda logout a@b.com         # remove and revoke at Google
 ```
 
-## Ajustes
+## Settings
 
-Em `~/.config/omarchy/shell.json`, na entrada do widget:
+In `~/.config/omarchy/shell.json`, on the widget's entry:
 
 ```json
 { "id": "esasse.agenda", "refreshIntervalSec": 180, "barLabelChars": 22 }
 ```
 
-Em `~/.local/share/omarchy-agenda/config.json` (opcional):
+In `~/.local/share/omarchy-agenda/config.json` (optional):
 
 ```json
 {
-  "aliases": { "erick@empresa.com": "trabalho" },
+  "aliases": { "erick@company.com": "work" },
   "ignore_calendars": ["pt-br.brazilian#holiday@group.v.calendar.google.com"],
   "hide_declined": false,
   "include_all_day": true
 }
 ```
 
-`aliases` renomeia a conta na linha de meta; `ignore_calendars` usa os ids que
-`omarchy-agenda calendars` imprime.
+`aliases` renames the account on the meta line; `ignore_calendars` takes the
+ids that `omarchy-agenda calendars` prints.
 
-## Estado local
+## Local state
 
-`~/.local/share/omarchy-agenda/` (0700, arquivos 0600):
+`~/.local/share/omarchy-agenda/` (0700, files 0600):
 
-| Arquivo | Conteúdo |
+| File | Contents |
 |---|---|
-| `client.json` | Client ID/secret do seu projeto |
-| `accounts/<email>.json` | refresh token por conta |
-| `tokens/<email>.json` | access token em cache (renovado sozinho) |
-| `cache/<data>.json` | último dia buscado — é o que aparece sem rede |
+| `client.json` | your project's Client ID/secret |
+| `accounts/<email>.json` | refresh token per account |
+| `tokens/<email>.json` | cached access token (renewed automatically) |
+| `cache/<date>.json` | last fetched day — what shows up with no network |
 
 ## IPC
 
 ```bash
-omarchy-shell esasse.agenda toggle    # abre/fecha o popup
+omarchy-shell esasse.agenda toggle    # open/close the popup
 omarchy-shell esasse.agenda refresh
-omarchy-shell esasse.agenda join      # entra na reunião de agora/próxima
-omarchy-shell esasse.agenda next      # devolve "14:30 Reunião"
+omarchy-shell esasse.agenda join      # join the current / next meeting
+omarchy-shell esasse.agenda next      # returns "14:30 Meeting"
 ```

@@ -1,8 +1,8 @@
-// Formatacao e derivacoes da agenda. Sem estado: recebe o payload do helper
-// (omarchy-agenda today --json) e devolve o que a UI precisa desenhar.
+// Formatting and derivations for the agenda. Stateless: it takes the helper's
+// payload (omarchy-agenda today --json) and returns what the UI has to draw.
 
-var SOON_SEC = 10 * 60          // "começa em breve"
-var GRACE_SEC = 5 * 60          // reunião ainda "entrável" após o fim
+var SOON_SEC = 10 * 60          // "starting soon"
+var GRACE_SEC = 5 * 60          // a meeting is still joinable after it ends
 
 function hm(iso) {
   var s = String(iso || "")
@@ -11,12 +11,12 @@ function hm(iso) {
 
 function timeLabel(event) {
   if (!event) return ""
-  return event.allDay ? "dia inteiro" : hm(event.start)
+  return event.allDay ? "all day" : hm(event.start)
 }
 
 function rangeLabel(event) {
   if (!event) return ""
-  if (event.allDay) return "dia inteiro"
+  if (event.allDay) return "all day"
   return hm(event.start) + "–" + hm(event.end)
 }
 
@@ -34,17 +34,17 @@ function duration(seconds) {
   return rest === 0 ? hours + "h" : hours + "h" + (rest < 10 ? "0" + rest : rest)
 }
 
-// "em 25 min" / "agora" / "ha 10 min", sempre relativo ao início do evento.
+// "in 25 min" / "now" / "10 min ago", always relative to the event's start.
 function relative(event, nowTs) {
   if (!event) return ""
-  if (event.allDay) return "hoje"
+  if (event.allDay) return "today"
   var delta = event.startTs - nowTs
-  if (delta > 30) return "em " + duration(delta)
-  if (event.endTs > nowTs) return "agora"
-  return "há " + duration(nowTs - event.startTs)
+  if (delta > 30) return "in " + duration(delta)
+  if (event.endTs > nowTs) return "now"
+  return duration(nowTs - event.startTs) + " ago"
 }
 
-// past | live | soon | future — dita cor e destaque da linha.
+// past | live | soon | future — drives the row's color and emphasis.
 function state(event, nowTs) {
   if (!event) return "future"
   if (event.allDay) return "future"
@@ -64,7 +64,7 @@ function declined(event) {
   return !!event && event.myStatus === "declined"
 }
 
-// Reunião acontecendo agora (a que termina primeiro, se houver sobreposição).
+// The meeting happening right now (the one ending first, when they overlap).
 function liveEvent(events, nowTs) {
   var list = events || []
   var best = null
@@ -88,8 +88,8 @@ function nextEvent(events, nowTs) {
   return null
 }
 
-// O que o clique do meio na barra (e o Enter no painel vazio) deve abrir:
-// a reunião em curso ganha da próxima.
+// What a middle click on the bar (and Enter on an empty panel) should open:
+// the meeting in progress wins over the next one.
 function focusEvent(events, nowTs) {
   var live = liveEvent(events, nowTs)
   if (live) return live
@@ -107,7 +107,7 @@ function remaining(events, nowTs) {
   return count
 }
 
-// Texto compacto da barra. Em barra vertical só o ícone sobra.
+// Compact bar text. On a vertical bar only the icon survives.
 function barLabel(events, nowTs, maxChars) {
   var live = liveEvent(events, nowTs)
   if (live) {
@@ -120,36 +120,37 @@ function barLabel(events, nowTs, maxChars) {
     return label
   }
   var pending = (events || []).length
-  return pending > 0 ? "󰃭 fim do dia" : "󰃭 livre"
+  return pending > 0 ? "󰃭 day's done" : "󰃭 clear"
 }
 
 function heroMeta(payload, nowTs) {
-  if (!payload) return "carregando…"
-  if (payload.needsSetup) return "configuração pendente"
-  if (payload.needsLogin) return "nenhuma conta conectada"
+  if (!payload) return "loading…"
+  if (payload.needsSetup) return "setup pending"
+  if (payload.needsLogin) return "no account connected"
   var events = payload.events || []
-  if (events.length === 0) return "nada agendado"
+  if (events.length === 0) return "nothing scheduled"
   var left = remaining(events, nowTs)
   var meetings = 0
   for (var i = 0; i < events.length; i++) if (events[i].joinUrl) meetings += 1
-  var parts = [events.length + (events.length === 1 ? " evento" : " eventos")]
-  if (meetings > 0) parts.push(meetings + (meetings === 1 ? " reunião" : " reuniões"))
+  var parts = [events.length + (events.length === 1 ? " event" : " events")]
+  if (meetings > 0) parts.push(meetings + (meetings === 1 ? " meeting" : " meetings"))
   var live = liveEvent(events, nowTs)
   var next = nextEvent(events, nowTs)
-  if (live) parts.push("agora até " + hm(live.end))
-  else if (next) parts.push("próxima " + relative(next, nowTs))
-  else if (left === 0) parts.push("encerrado")
+  if (live) parts.push("now until " + hm(live.end))
+  else if (next) parts.push("next " + relative(next, nowTs))
+  else if (left === 0) parts.push("all done")
   return parts.join(" · ")
 }
 
 function dateLabel(isoDate) {
-  var months = ["janeiro", "fevereiro", "março", "abril", "maio", "junho",
-                "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"]
-  var weekdays = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"]
+  var months = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"]
+  var weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+                  "Friday", "Saturday"]
   var parts = String(isoDate || "").split("-")
   if (parts.length !== 3) return ""
   var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]))
-  return weekdays[d.getDay()] + ", " + d.getDate() + " de " + months[d.getMonth()]
+  return weekdays[d.getDay()] + ", " + months[d.getMonth()] + " " + d.getDate()
 }
 
 function joinGlyph(kind) {
@@ -173,22 +174,22 @@ function joinName(kind) {
   case "chime": return "Chime"
   case "slack": return "Slack"
   case "": return ""
-  default: return "videochamada"
+  default: return "video call"
   }
 }
 
 function statusMark(event) {
   if (!event) return ""
   switch (String(event.myStatus || "")) {
-  case "declined": return "recusado"
-  case "tentative": return "talvez"
-  case "needsAction": return "sem resposta"
+  case "declined": return "declined"
+  case "tentative": return "tentative"
+  case "needsAction": return "no reply"
   default: return ""
   }
 }
 
-// Linha secundária da reunião: conta, agenda quando difere, sala/local,
-// status de participação e recorrência.
+// A meeting's second line: account, calendar when it differs, room/location,
+// RSVP status and guest count.
 function metaLine(event) {
   if (!event) return ""
   var bits = [event.accountLabel || event.account]
@@ -198,7 +199,7 @@ function metaLine(event) {
   else if (event.location) bits.push(shortTitle(event.location, 28))
   var mark = statusMark(event)
   if (mark) bits.push(mark)
-  if (event.attendeeCount > 1) bits.push(event.attendeeCount + " pessoas")
+  if (event.attendeeCount > 1) bits.push(event.attendeeCount + " guests")
   return bits.join(" · ")
 }
 
@@ -206,9 +207,9 @@ function tooltip(payload, events, nowTs) {
   var lines = []
   var live = liveEvent(events, nowTs)
   var next = nextEvent(events, nowTs)
-  if (live) lines.push("Agora: " + live.title + " (termina em " + duration(live.endTs - nowTs) + ")")
-  if (next) lines.push("Depois: " + hm(next.start) + " " + next.title + " (" + relative(next, nowTs) + ")")
-  if (lines.length === 0) lines.push("Sem reuniões pendentes hoje")
-  if (payload && payload.stale) lines.push("(dados em cache — sem rede)")
+  if (live) lines.push("Now: " + live.title + " (ends in " + duration(live.endTs - nowTs) + ")")
+  if (next) lines.push("Next: " + hm(next.start) + " " + next.title + " (" + relative(next, nowTs) + ")")
+  if (lines.length === 0) lines.push("No meetings left today")
+  if (payload && payload.stale) lines.push("(cached — no network)")
   return lines.join("\n")
 }
