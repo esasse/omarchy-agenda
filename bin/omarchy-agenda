@@ -630,11 +630,11 @@ def fetch_events(email, label, token, calendar, day_start, day_end, config):
 def resolve_date(value):
     today = date_cls.today()
     text = str(value or "today").strip().lower()
-    if text in ("today", "hoje", ""):
+    if text in ("today", ""):
         return today
-    if text in ("tomorrow", "amanha", "amanhã"):
+    if text == "tomorrow":
         return today + timedelta(days=1)
-    if text in ("yesterday", "ontem"):
+    if text == "yesterday":
         return today - timedelta(days=1)
     try:
         return date_cls.fromisoformat(text)
