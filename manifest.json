@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "esasse.agenda",
+  "name": "Agenda",
+  "version": "1.0.0",
+  "author": "esasse",
+  "license": "MIT",
+  "description": "Agenda do dia de várias contas Google na barra, com entrada na reunião em um clique.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Agenda",
+    "description": "Próxima reunião na barra e a agenda do dia no popup, com um clique para entrar.",
+    "category": "Time",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "refreshIntervalSec": 180,
+      "barLabelChars": 22
+    },
+    "schema": [
+      {
+        "key": "refreshIntervalSec",
+        "type": "integer",
+        "label": "Intervalo de atualização (segundos)",
+        "min": 30,
+        "max": 3600,
+        "step": 30,
+        "defaultValue": 180
+      },
+      {
+        "key": "barLabelChars",
+        "type": "integer",
+        "label": "Tamanho do título na barra",
+        "min": 6,
+        "max": 60,
+        "step": 2,
+        "defaultValue": 22
+      }
+    ]
+  }
+}
