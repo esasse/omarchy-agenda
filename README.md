@@ -9,11 +9,40 @@ esasse.agenda/
 ├── Panel.qml              rótulo na barra + popup da agenda
 ├── Service.qml            ciclo de vida: poll, relógio, ações
 ├── Model.js               formatação e derivações (rótulo, estados, textos)
-└── bin/omarchy-agenda     helper Python (OAuth + Google Calendar API)
+├── bin/omarchy-agenda     helper Python (OAuth + Google Calendar API)
+└── LICENSE                MIT
 ```
 
 O QML nunca fala com o Google: ele só roda `omarchy-agenda today --json` e
 desenha o resultado. O helper é stdlib pura — sem pip, sem AUR.
+
+## Instalação
+
+Numa máquina Omarchy nova:
+
+```bash
+omarchy plugin add https://github.com/esasse/omarchy-agenda.git --enable --yes
+```
+
+O widget entra na seção direita da barra; mova com
+`omarchy bar move esasse.agenda --section <left|center|right>`.
+
+O popup chama o helper pelo caminho absoluto dentro do próprio plugin
+(`Qt.resolvedUrl`), então o painel funciona sem depender do `PATH` da shell.
+Para usar o CLI no terminal — `setup`, `login`, `today`, `calendars` — crie o
+symlink:
+
+```bash
+ln -sf ~/.config/omarchy/plugins/esasse.agenda/bin/omarchy-agenda \
+       ~/.local/bin/omarchy-agenda
+```
+
+Se o plugin foi clonado com outro id, o caminho é
+`~/.config/omarchy/plugins/<id>/bin/omarchy-agenda`.
+
+Editar `Model.js` ou os `.qml` pede `omarchy restart shell`: o hot reload do
+shell não reinstancia widgets da barra e deixa o `IpcHandler` antigo
+registrado no alvo.
 
 ## Configuração (uma vez)
 
@@ -122,6 +151,3 @@ omarchy-shell esasse.agenda refresh
 omarchy-shell esasse.agenda join      # entra na reunião de agora/próxima
 omarchy-shell esasse.agenda next      # devolve "14:30 Reunião"
 ```
-
-Editar `Model.js` ou os `.qml` pede `omarchy restart shell` — o hot reload do
-shell não reinstancia widgets da barra.
