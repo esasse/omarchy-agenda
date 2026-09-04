@@ -383,7 +383,7 @@
     <p class="lede">A agenda do dia de várias contas Google na barra do Omarchy — e um clique para entrar na reunião que está começando.</p>
     <div class="links">
       <a class="btn btn--primary" href="https://github.com/esasse/omarchy-agenda">Repositório</a>
-      <a class="btn" href="https://github.com/esasse/omarchy-agenda#instala%C3%A7%C3%A3o">Instalação</a>
+      <a class="btn" href="#instalacao">Instalação</a>
       <a class="btn" href="https://omarchy.org">Omarchy</a>
     </div>
   </header>
@@ -493,7 +493,7 @@
   </figure>
 
   <main>
-    <section>
+    <section id="o-que-faz">
       <h2>O que ele faz</h2>
       <div class="traits">
         <div class="trait">
@@ -515,7 +515,7 @@
       </div>
     </section>
 
-    <section>
+    <section id="instalacao">
       <h2>Instalação</h2>
       <pre><span class="c"># o plugin é um repositório git com manifest.json na raiz</span>
 omarchy plugin add https://github.com/esasse/omarchy-agenda.git --enable --yes
@@ -525,7 +525,7 @@ ln -sf ~/.config/omarchy/plugins/esasse.agenda/bin/omarchy-agenda ~/.local/bin/o
       <p>O widget entra na seção direita da barra; mova com <code>omarchy bar move esasse.agenda --section left</code>. Editar o QML depois pede <code>omarchy restart shell</code>.</p>
     </section>
 
-    <section>
+    <section id="contas">
       <h2>Conectar as contas</h2>
       <p>O plugin usa um OAuth client seu, criado uma vez no Google Cloud — nenhuma credencial vem embutida no código.</p>
       <ol>
@@ -537,7 +537,7 @@ ln -sf ~/.config/omarchy/plugins/esasse.agenda/bin/omarchy-agenda ~/.local/bin/o
       <p>Enquanto o app ficar em modo <em>Testing</em> no Console, o Google expira a autorização a cada 7 dias e o <code>login</code> tem que ser repetido; publicar o app remove essa validade.</p>
     </section>
 
-    <section>
+    <section id="uso">
       <h2>Como se usa</h2>
       <table>
         <caption>Na barra</caption>
@@ -559,7 +559,7 @@ ln -sf ~/.config/omarchy/plugins/esasse.agenda/bin/omarchy-agenda ~/.local/bin/o
       </table>
     </section>
 
-    <section>
+    <section id="privacidade">
       <h2>Privacidade</h2>
       <dl class="privacy">
         <dt>Escopo somente leitura</dt>
