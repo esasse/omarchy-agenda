@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>omarchy-agenda</title>
+<meta name="description" content="Agenda do dia de várias contas Google na barra do Omarchy, com um clique para entrar na reunião.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ground: #f4f5f6;
+    --surface: #ffffff;
+    --surface-2: #eceef0;
+    --text: #14181b;
+    --muted: #5c666d;
+    --line: #d9dde0;
+    --accent: #c2415c;
+    --blue: #2f7597;
+
+    /* A reprodução da barra guarda o próprio tema: ela é um pedaço de
+       desktop escuro, e não muda de cor com a página. */
+    --bar-ground: #0f1214;
+    --bar-surface: #171b1e;
+    --bar-text: #cfd2d4;
+    --bar-muted: #7b858c;
+    --bar-line: #262c31;
+    --bar-accent: #e05d78;
+    --bar-blue: #3f8fb8;
+
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0f1214;
+      --surface: #171b1e;
+      --surface-2: #1d2226;
+      --text: #cfd2d4;
+      --muted: #8a939a;
+      --line: #262c31;
+      --accent: #e05d78;
+      --blue: #5aa6cc;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0f1214;
+    --surface: #171b1e;
+    --surface-2: #1d2226;
+    --text: #cfd2d4;
+    --muted: #8a939a;
+    --line: #262c31;
+    --accent: #e05d78;
+    --blue: #5aa6cc;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: 0 1.5rem 5rem;
+  }
+
+  /* ---------------------------------------------------------- cabeçalho */
+
+  header {
+    padding: 4rem 0 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 34rem;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(2rem, 6vw, 2.75rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .lede {
+    font-size: 1.125rem;
+    color: var(--text);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .btn {
+    font-family: var(--mono);
+    font-size: 0.875rem;
+    text-decoration: none;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    color: var(--text);
+    background: var(--surface);
+    transition: border-color 120ms ease, color 120ms ease;
+  }
+
+  .btn:hover, .btn:focus-visible { border-color: var(--accent); color: var(--accent); }
+  .btn--primary { border-color: var(--accent); color: var(--accent); }
+
+  a { color: var(--blue); }
+  a:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ------------------------------------------------- reprodução da UI */
+
+  .demo { margin: 1rem 0 0.75rem; }
+
+  .desktop {
+    max-width: 42rem;
+    background: var(--bar-ground);
+    border: 1px solid var(--bar-line);
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: var(--mono);
+    color: var(--bar-text);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0 0.7rem;
+    height: 34px;
+    font-size: 0.8125rem;
+    border-bottom: 1px solid var(--bar-line);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .bar::-webkit-scrollbar { display: none; }
+  .bar__spacer { flex: 1 1 auto; }
+  .ws { display: flex; gap: 0.6rem; color: var(--bar-muted); }
+  .ws b { color: var(--bar-text); font-weight: 500; }
+
+  .widget {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--bar-accent);
+    white-space: nowrap;
+    border-bottom: 1.5px solid var(--bar-accent);
+    padding-bottom: 1px;
+  }
+
+  .tray { display: flex; gap: 0.6rem; color: var(--bar-muted); flex: 0 0 auto; }
+
+  .stage { padding: 0.6rem 0.6rem 0.9rem; display: flex; justify-content: flex-end; }
+
+  .popup {
+    width: min(26rem, 100%);
+    background: var(--bar-surface);
+    border: 1px solid var(--bar-accent);
+    border-radius: 3px;
+    padding: 0.9rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .hero-row { display: flex; align-items: flex-start; gap: 0.7rem; }
+  .hero-row__icon { color: var(--bar-accent); flex: 0 0 auto; margin-top: 2px; }
+  .hero-row__text { flex: 1 1 auto; min-width: 0; display: block; }
+  .hero-row__title { display: block; font-size: 1.0625rem; font-weight: 600; line-height: 1.3; }
+
+  .hero-row__meta {
+    display: block;
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bar-muted);
+  }
+
+  .hero-row__date {
+    font-size: 0.75rem;
+    color: var(--bar-muted);
+    border: 1px solid var(--bar-line);
+    border-radius: 2px;
+    padding: 0.15rem 0.4rem;
+    white-space: nowrap;
+  }
+
+  .section-label {
+    font-size: 0.625rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--bar-muted);
+    border-top: 1px solid var(--bar-line);
+    padding-top: 0.7rem;
+  }
+
+  .events { display: flex; flex-direction: column; gap: 0.15rem; }
+
+  .event {
+    display: grid;
+    grid-template-columns: 3px 2.9rem 1fr auto;
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.4rem 0.45rem;
+    border-radius: 2px;
+  }
+
+  .event--live { background: rgba(224, 93, 120, 0.11); }
+  .event--past { opacity: 0.45; }
+  .event__stripe { height: 100%; min-height: 2.1rem; border-radius: 2px; background: var(--bar-blue); }
+  .event--live .event__stripe { background: var(--bar-accent); }
+  .event--personal .event__stripe { background: #b4685f; }
+
+  .event__time {
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.35;
+  }
+
+  .event__time span { display: block; font-size: 0.6875rem; color: var(--bar-muted); }
+  .event--live .event__time { color: var(--bar-accent); }
+  .event__body { min-width: 0; }
+
+  .event__title {
+    display: block;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .event__meta {
+    display: block;
+    font-size: 0.6875rem;
+    color: var(--bar-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .event__side {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.6875rem;
+    color: var(--bar-muted);
+    white-space: nowrap;
+  }
+
+  .event--live .event__side { color: var(--bar-accent); }
+  .event__join { color: inherit; display: inline-flex; }
+  .hint { font-size: 0.6875rem; color: var(--bar-muted); }
+
+  figcaption {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.6rem;
+  }
+
+  /* -------------------------------------------------------- conteúdo */
+
+  main { display: flex; flex-direction: column; gap: 3rem; margin-top: 3.5rem; }
+  section { display: flex; flex-direction: column; gap: 1rem; }
+
+  h2 {
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin: 0;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  p { margin: 0; max-width: 40rem; }
+
+  .traits { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.5rem 2rem; }
+  .trait { display: flex; flex-direction: column; gap: 0.3rem; }
+
+  .trait h3 {
+    font-family: var(--mono);
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--accent);
+  }
+
+  .trait p { font-size: 0.9375rem; color: var(--text); }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--accent);
+    border-radius: 3px;
+    padding: 0.9rem 1rem;
+    margin: 0;
+    overflow-x: auto;
+  }
+
+  pre .c { color: var(--muted); }
+
+  ol { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: 0.5rem; max-width: 40rem; }
+  ol code, p code, li code, dd code { font-family: var(--mono); font-size: 0.875em; color: var(--accent); }
+
+  table { border-collapse: collapse; width: 100%; max-width: 34rem; font-size: 0.9375rem; }
+  caption { text-align: left; font-size: 0.8125rem; color: var(--muted); padding-bottom: 0.5rem; }
+  th, td { text-align: left; padding: 0.45rem 0.8rem 0.45rem 0; border-bottom: 1px solid var(--line); }
+
+  th {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+    width: 9.5rem;
+    color: var(--muted);
+  }
+
+  .privacy { display: flex; flex-direction: column; gap: 0.5rem; max-width: 40rem; }
+  .privacy dt { font-family: var(--mono); font-size: 0.8125rem; color: var(--accent); }
+  .privacy dd { margin: 0 0 0.6rem; font-size: 0.9375rem; }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+  }
+
+  @media (max-width: 34rem) {
+    .stage { justify-content: stretch; padding: 0.7rem 0.5rem 1rem; }
+    .event { grid-template-columns: 3px 2.6rem 1fr; }
+    .event__side { grid-column: 3; justify-content: flex-start; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Plugin do omarchy-shell</p>
+    <h1>omarchy-agenda</h1>
+    <p class="lede">A agenda do dia de várias contas Google na barra do Omarchy — e um clique para entrar na reunião que está começando.</p>
+    <div class="links">
+      <a class="btn btn--primary" href="https://github.com/esasse/omarchy-agenda">Repositório</a>
+      <a class="btn" href="https://github.com/esasse/omarchy-agenda#instala%C3%A7%C3%A3o">Instalação</a>
+      <a class="btn" href="https://omarchy.org">Omarchy</a>
+    </div>
+  </header>
+
+  <figure class="demo">
+    <div class="desktop">
+      <div class="bar">
+        <span class="ws"><b>1</b> 2 3 4 5</span>
+        <span class="bar__spacer"></span>
+        <span class="widget">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M15 10.5 21 7v10l-6-3.5"></path>
+            <rect x="3" y="6" width="12" height="12" rx="2"></rect>
+          </svg>
+          Daily do time de produto · 21 min
+        </span>
+        <span class="tray" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 13a11 11 0 0 1 14 0"></path><path d="M8.5 16.5a6 6 0 0 1 7 0"></path><circle cx="12" cy="20" r="1"></circle></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 10v4h3l4 3V7l-4 3H4z"></path><path d="M16 9a4 4 0 0 1 0 6"></path></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="5" width="16" height="11" rx="1.5"></rect><path d="M8 20h8"></path></svg>
+        </span>
+      </div>
+
+      <div class="stage">
+        <div class="popup">
+          <div class="hero-row">
+            <span class="hero-row__icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+                <path d="M15 10.5 21 7v10l-6-3.5"></path>
+                <rect x="3" y="6" width="12" height="12" rx="2"></rect>
+              </svg>
+            </span>
+            <span class="hero-row__text">
+              <span class="hero-row__title">Hoje</span>
+              <span class="hero-row__meta">6 eventos · agora até 09:39</span>
+            </span>
+            <span class="hero-row__date">sexta, 4 de setembro</span>
+          </div>
+
+          <p class="section-label">Agenda do dia</p>
+
+          <div class="events">
+            <div class="event event--personal">
+              <span class="event__stripe"></span>
+              <span class="event__time">dia<span>inteiro</span></span>
+              <span class="event__body">
+                <span class="event__title">Feriado municipal</span>
+                <span class="event__meta">pessoal · Feriados</span>
+              </span>
+              <span class="event__side">hoje</span>
+            </div>
+
+            <div class="event event--past">
+              <span class="event__stripe"></span>
+              <span class="event__time">06:30<span>07:30</span></span>
+              <span class="event__body">
+                <span class="event__title">Revisão de roadmap</span>
+                <span class="event__meta">trabalho · Google Meet · 6 pessoas</span>
+              </span>
+              <span class="event__side"></span>
+            </div>
+
+            <div class="event event--live">
+              <span class="event__stripe"></span>
+              <span class="event__time">09:09<span>09:39</span></span>
+              <span class="event__body">
+                <span class="event__title">Daily do time de produto</span>
+                <span class="event__meta">trabalho · Google Meet · 8 pessoas</span>
+              </span>
+              <span class="event__side">
+                agora
+                <span class="event__join">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                    <path d="M15 10.5 21 7v10l-6-3.5"></path>
+                    <rect x="3" y="6" width="12" height="12" rx="2"></rect>
+                  </svg>
+                </span>
+              </span>
+            </div>
+
+            <div class="event">
+              <span class="event__stripe"></span>
+              <span class="event__time">09:40<span>10:10</span></span>
+              <span class="event__body">
+                <span class="event__title">1:1 com Henrique</span>
+                <span class="event__meta">trabalho · Zoom · 2 pessoas</span>
+              </span>
+              <span class="event__side">em 22 min</span>
+            </div>
+
+            <div class="event event--personal">
+              <span class="event__stripe"></span>
+              <span class="event__time">11:30<span>12:30</span></span>
+              <span class="event__body">
+                <span class="event__title">Consulta médica</span>
+                <span class="event__meta">pessoal · Av. Paulista 1000, sala 42</span>
+              </span>
+              <span class="event__side">em 2h30</span>
+            </div>
+          </div>
+
+          <p class="hint">enter entrar · j próxima · r atualizar · o no Calendar</p>
+        </div>
+      </div>
+    </div>
+    <figcaption>Reprodução da interface, com eventos de exemplo. A linha em destaque é a reunião em curso; o ícone à direita entra na chamada.</figcaption>
+  </figure>
+
+  <main>
+    <section>
+      <h2>O que ele faz</h2>
+      <div class="traits">
+        <div class="trait">
+          <h3>Várias contas, uma lista</h3>
+          <p>Cada conta Google entra com suas agendas visíveis, e o dia aparece em ordem cronológica — não uma aba por conta.</p>
+        </div>
+        <div class="trait">
+          <h3>Entrar em um clique</h3>
+          <p>Clicar na linha abre a chamada: Meet, Zoom, Teams, Webex e afins, vindos do campo de conferência do evento ou garimpados da descrição do convite.</p>
+        </div>
+        <div class="trait">
+          <h3>Na conta certa</h3>
+          <p>Links do Google saem com <code>authuser=&lt;conta&gt;</code>, então a reunião abre na conta dona do convite mesmo com várias logadas no navegador.</p>
+        </div>
+        <div class="trait">
+          <h3>Sem dependências</h3>
+          <p>O QML só desenha; quem fala com o Google é um helper de <em>stdlib</em> pura do Python. Sem pip, sem AUR, sem daemon.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Instalação</h2>
+      <pre><span class="c"># o plugin é um repositório git com manifest.json na raiz</span>
+omarchy plugin add https://github.com/esasse/omarchy-agenda.git --enable --yes
+
+<span class="c"># o CLI no terminal (o popup usa caminho absoluto e não precisa disto)</span>
+ln -sf ~/.config/omarchy/plugins/esasse.agenda/bin/omarchy-agenda ~/.local/bin/omarchy-agenda</pre>
+      <p>O widget entra na seção direita da barra; mova com <code>omarchy bar move esasse.agenda --section left</code>. Editar o QML depois pede <code>omarchy restart shell</code>.</p>
+    </section>
+
+    <section>
+      <h2>Conectar as contas</h2>
+      <p>O plugin usa um OAuth client seu, criado uma vez no Google Cloud — nenhuma credencial vem embutida no código.</p>
+      <ol>
+        <li>Crie um projeto e ative a <strong>Google Calendar API</strong>.</li>
+        <li>Configure a tela de consentimento como <strong>Externa</strong> e crie uma credencial do tipo <strong>App para computador</strong>.</li>
+        <li>Baixe o JSON e rode <code>omarchy-agenda setup --from ~/Downloads/client_secret_*.json</code>.</li>
+        <li>Rode <code>omarchy-agenda login</code> uma vez por conta.</li>
+      </ol>
+      <p>Enquanto o app ficar em modo <em>Testing</em> no Console, o Google expira a autorização a cada 7 dias e o <code>login</code> tem que ser repetido; publicar o app remove essa validade.</p>
+    </section>
+
+    <section>
+      <h2>Como se usa</h2>
+      <table>
+        <caption>Na barra</caption>
+        <tbody>
+          <tr><th>clique esquerdo</th><td>abre e fecha o popup da agenda</td></tr>
+          <tr><th>clique do meio</th><td>entra na reunião em curso, ou na próxima</td></tr>
+          <tr><th>clique direito</th><td>atualiza agora</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <caption>No popup</caption>
+        <tbody>
+          <tr><th>↑ ↓</th><td>navega pelos eventos</td></tr>
+          <tr><th>enter</th><td>entra na reunião selecionada</td></tr>
+          <tr><th>j</th><td>pula para a reunião de agora</td></tr>
+          <tr><th>r</th><td>atualiza</td></tr>
+          <tr><th>o</th><td>abre o evento no Google Calendar</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Privacidade</h2>
+      <dl class="privacy">
+        <dt>Escopo somente leitura</dt>
+        <dd>O app pede <code>calendar.readonly</code> e o e-mail da conta. Não cria, altera nem apaga eventos.</dd>
+        <dt>Tudo fica na máquina</dt>
+        <dd>Client secret, refresh tokens e o cache do dia vivem em <code>~/.local/share/omarchy-agenda/</code>, com permissão <code>600</code> em pasta <code>700</code>. Não há servidor no meio: o helper fala direto com a API do Google.</dd>
+        <dt>Nada é compartilhado</dt>
+        <dd>Nenhum dado de agenda é enviado a terceiros, e o projeto não tem telemetria. Para revogar, use <code>omarchy-agenda logout &lt;conta&gt;</code> ou a página de permissões da sua Conta Google.</dd>
+      </dl>
+    </section>
+  </main>
+
+  <footer>
+    <span>MIT</span>
+    <span>Erick Sasse</span>
+    <a href="https://github.com/esasse/omarchy-agenda">github.com/esasse/omarchy-agenda</a>
+  </footer>
+
+</div>
+</body>
+</html>
