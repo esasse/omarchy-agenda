@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+  :root {
+    --ground: #f4f5f6;
+    --surface: #ffffff;
+    --text: #14181b;
+    --muted: #5c666d;
+    --line: #d9dde0;
+    --accent: #c2415c;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0f1214;
+      --surface: #171b1e;
+      --text: #cfd2d4;
+      --muted: #8a939a;
+      --line: #262c31;
+      --accent: #e05d78;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 44rem; margin: 0 auto; padding: 3.5rem 1.5rem 5rem; }
+
+  .back {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .back:hover, .back:focus-visible { color: var(--accent); }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(1.6rem, 5vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 1.25rem 0 0.35rem;
+    text-wrap: balance;
+  }
+
+  .stamp {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin: 0 0 2.5rem;
+  }
+
+  h2 {
+    font-family: var(--mono);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 2.5rem 0 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  p, li { margin: 0 0 0.85rem; }
+  ul { padding-left: 1.2rem; }
+  a { color: var(--accent); text-underline-offset: 2px; }
+  a:focus-visible, .back:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  code { font-family: var(--mono); font-size: 0.875em; color: var(--accent); }
+  strong { font-weight: 600; }
+
+  footer {
+    margin-top: 3.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+</style>
+<title>Terms of service · omarchy-agenda</title>
+<meta name="description" content="The MIT-licensed terms under which the omarchy-agenda plugin is provided.">
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="/omarchy-agenda/">&larr; omarchy-agenda</a>
+    <h1>Terms of service</h1>
+    <p class="stamp">Last updated: 4 September 2026</p>
+
+    <p><strong>omarchy-agenda</strong> is free software distributed under the
+    <a href="https://github.com/esasse/omarchy-agenda/blob/main/LICENSE">MIT
+    license</a>. Those license terms govern your use of the code; the
+    paragraphs below only spell out what that means in practice.</p>
+
+    <h2>What you get</h2>
+    <p>A plugin you install on your own computer, which reads your Google
+    calendars with your own credentials and displays them in your status bar.
+    There is no hosted service, no account to create and nothing to pay.</p>
+
+    <h2>Your credentials, your project</h2>
+    <p>The plugin ships with no Google credentials. You create an OAuth client
+    in your own Google Cloud project and authorize your own accounts, so the
+    API quota, the consent screen and the data all belong to you. Keep the
+    client secret and the tokens under
+    <code>~/.local/share/omarchy-agenda/</code> to yourself; they grant
+    read access to your calendars.</p>
+
+    <h2>No warranty</h2>
+    <p>The software is provided "as is", without warranty of any kind, as
+    stated in the MIT license. It reads a calendar and opens links — it is not
+    a reminder service and it should not be relied upon as the only thing
+    standing between you and a meeting. Missed meetings, wrong times, a stale
+    cache or an expired authorization are possible, and the author is not
+    liable for them.</p>
+
+    <h2>Acceptable use</h2>
+    <p>Use it on accounts you are entitled to access. When you connect a work
+    account, your employer's policies still apply to that data.</p>
+
+    <h2>Google</h2>
+    <p>This project is not affiliated with, endorsed by or sponsored by Google.
+    Google Calendar, Google Meet and Google Cloud are trademarks of Google LLC.
+    Your use of Google's services remains governed by
+    <a href="https://policies.google.com/terms">Google's own terms</a>.</p>
+
+    <h2>Changes</h2>
+    <p>These terms can change; the new version replaces this page and the date
+    above changes with it. The page's history is public in the repository.</p>
+
+    <h2>Contact</h2>
+    <p>Erick Sasse — <a href="mailto:esasse@gmail.com">esasse@gmail.com</a>.</p>
+
+    <footer>omarchy-agenda · MIT · <a href="/omarchy-agenda/">project page</a> ·
+    <a href="/omarchy-agenda/privacy.html">privacy policy</a></footer>
+  </div>
+</body>
+</html>

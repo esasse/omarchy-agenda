@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+  :root {
+    --ground: #f4f5f6;
+    --surface: #ffffff;
+    --text: #14181b;
+    --muted: #5c666d;
+    --line: #d9dde0;
+    --accent: #c2415c;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0f1214;
+      --surface: #171b1e;
+      --text: #cfd2d4;
+      --muted: #8a939a;
+      --line: #262c31;
+      --accent: #e05d78;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 44rem; margin: 0 auto; padding: 3.5rem 1.5rem 5rem; }
+
+  .back {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .back:hover, .back:focus-visible { color: var(--accent); }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(1.6rem, 5vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 1.25rem 0 0.35rem;
+    text-wrap: balance;
+  }
+
+  .stamp {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin: 0 0 2.5rem;
+  }
+
+  h2 {
+    font-family: var(--mono);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 2.5rem 0 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  p, li { margin: 0 0 0.85rem; }
+  ul { padding-left: 1.2rem; }
+  a { color: var(--accent); text-underline-offset: 2px; }
+  a:focus-visible, .back:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  code { font-family: var(--mono); font-size: 0.875em; color: var(--accent); }
+  strong { font-weight: 600; }
+
+  footer {
+    margin-top: 3.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+</style>
+<title>Privacy policy · omarchy-agenda</title>
+<meta name="description" content="What omarchy-agenda reads from your Google account, where it is stored, and how to remove it.">
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="/omarchy-agenda/">&larr; omarchy-agenda</a>
+    <h1>Privacy policy</h1>
+    <p class="stamp">Last updated: 4 September 2026</p>
+
+    <p><strong>omarchy-agenda</strong> is a desktop plugin for the
+    <a href="https://omarchy.org">Omarchy</a> status bar. It shows the day's
+    calendar events and opens the meeting link. It is free software, published
+    under the MIT license at
+    <a href="https://github.com/esasse/omarchy-agenda">github.com/esasse/omarchy-agenda</a>,
+    and it runs entirely on the computer where it is installed.</p>
+
+    <h2>What it accesses</h2>
+    <p>With the permission you grant during sign-in, the plugin reads through
+    the Google Calendar API:</p>
+    <ul>
+      <li><code>calendar.readonly</code> — the calendars of the account and the
+      events of the day being displayed: title, start and end, location,
+      description, conference link, guest count and your RSVP status.</li>
+      <li><code>openid email</code> — the account's e-mail address, used to
+      label which account an event came from and to pin the right account on
+      Google meeting links.</li>
+    </ul>
+    <p>It never creates, edits or deletes anything in your calendars. The
+    scope granted is read-only.</p>
+
+    <h2>Where the data goes</h2>
+    <p>Nowhere. There is no server, no account, no analytics and no telemetry
+    in this project. The plugin talks directly from your machine to Google's
+    API, and the data is drawn on your screen.</p>
+    <p>What is written to disk stays on your machine, under
+    <code>~/.local/share/omarchy-agenda/</code>, readable only by your user
+    (files mode <code>600</code>, directory <code>700</code>):</p>
+    <ul>
+      <li>the OAuth client id and secret of <em>your own</em> Google Cloud
+      project;</li>
+      <li>one OAuth refresh token per connected account, and a short-lived
+      access token cache;</li>
+      <li>a cache of the events of the day last fetched, so the panel can show
+      something when the network is down.</li>
+    </ul>
+
+    <h2>Sharing</h2>
+    <p>No calendar data, e-mail address or token is transmitted to the author
+    of this project or to any third party. The only network destination is
+    Google's own API endpoints (<code>oauth2.googleapis.com</code> and
+    <code>www.googleapis.com</code>), plus whatever meeting URL you choose to
+    open in your browser.</p>
+    <p>The project's use of information received from Google APIs adheres to
+    the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google
+    API Services User Data Policy</a>, including its Limited Use requirements.</p>
+
+    <h2>Retention and removal</h2>
+    <p>The event cache holds one day and is overwritten on each refresh. To
+    remove everything:</p>
+    <ul>
+      <li><code>omarchy-agenda logout &lt;account&gt;</code> deletes that
+      account's tokens locally and revokes the grant at Google;</li>
+      <li>deleting <code>~/.local/share/omarchy-agenda/</code> removes all
+      local state;</li>
+      <li>you can revoke access at any time from
+      <a href="https://myaccount.google.com/permissions">your Google Account's
+      permissions page</a>, with or without the plugin installed.</li>
+    </ul>
+
+    <h2>Children</h2>
+    <p>The plugin is a developer tool for a Linux desktop and is not directed
+    at children.</p>
+
+    <h2>Changes</h2>
+    <p>If this policy changes, the new version replaces this page and the date
+    above changes with it. The page's history is public in the repository.</p>
+
+    <h2>Contact</h2>
+    <p>Erick Sasse — <a href="mailto:esasse@gmail.com">esasse@gmail.com</a>.
+    Bugs and questions are also welcome as
+    <a href="https://github.com/esasse/omarchy-agenda/issues">issues</a>.</p>
+
+    <footer>omarchy-agenda · MIT · <a href="/omarchy-agenda/">project page</a> ·
+    <a href="/omarchy-agenda/terms.html">terms of service</a></footer>
+  </div>
+</body>
+</html>
