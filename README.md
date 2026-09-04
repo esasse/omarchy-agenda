@@ -45,6 +45,20 @@ Editing `Model.js` or the `.qml` files needs `omarchy restart shell`: the
 shell's hot reload does not re-instantiate bar widgets, and it leaves the old
 `IpcHandler` registered on the target.
 
+### Optional keybinding
+
+The panel opens by clicking the widget. To open it from the keyboard, add a
+binding to `~/.config/hypr/bindings.lua` — it lives in your Hyprland config,
+not in the plugin, so it does not travel with `omarchy plugin add`:
+
+```lua
+o.bind("SUPER + A", "Agenda", "omarchy-shell esasse.agenda toggle")
+```
+
+`SUPER + A` is free on a stock Omarchy (`SUPER+CTRL+A` is Audio,
+`SUPER+SHIFT+A` is ChatGPT). Check yours with
+`omarchy menu keybindings --print`, and reload with `hyprctl reload`.
+
 ## Setup (once)
 
 1. **Project** — <https://console.cloud.google.com/projectcreate>
